@@ -1,0 +1,898 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #0f1117;
+    color: #e2e8f0;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ─── INTRO ─── */
+  #intro {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    background: linear-gradient(135deg, #0f1117 0%, #1a1f2e 100%);
+  }
+  #intro.active { display: flex; }
+
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #4ade80;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 2.5rem;
+    padding: 6px 16px;
+    border: 1px solid #4ade8033;
+    border-radius: 20px;
+  }
+
+  .intro-title {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #ffffff 0%, #94a3b8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .intro-sub {
+    font-size: 16px;
+    color: #64748b;
+    max-width: 480px;
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+
+  .name-input-wrap {
+    width: 100%;
+    max-width: 360px;
+    margin-bottom: 1.5rem;
+  }
+
+  .name-input-wrap label {
+    display: block;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 8px;
+    text-align: left;
+  }
+
+  .name-input-wrap input {
+    width: 100%;
+    padding: 12px 16px;
+    background: #1e2535;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    color: #e2e8f0;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .name-input-wrap input:focus { border-color: #4ade80; }
+
+  .meta-row {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .meta-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+  }
+  .dot-blue { background: #60a5fa; }
+  .dot-yellow { background: #fbbf24; }
+  .dot-red { background: #f87171; }
+
+  .start-btn {
+    padding: 14px 40px;
+    background: #4ade80;
+    color: #0f1117;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .start-btn:hover { background: #22c55e; transform: translateY(-1px); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+  /* ─── TEST ─── */
+  #test {
+    min-height: 100vh;
+    padding: 1.5rem;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+
+  .test-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+  }
+
+  .progress-wrap {
+    flex: 1;
+    height: 4px;
+    background: #1e2535;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #4ade80, #22d3ee);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .q-counter {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .score-live {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: #4ade80;
+    white-space: nowrap;
+  }
+
+  .section-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+  }
+
+  .badge-theory { background: #1e3a5f; color: #60a5fa; }
+  .badge-practice { background: #1a3a2a; color: #4ade80; }
+
+  .question-card {
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 1.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .q-text {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    color: #e2e8f0;
+  }
+
+  .code-block {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    background: #0f1117;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 0.75rem 0 1.25rem;
+    color: #a5f3fc;
+    line-height: 1.7;
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  /* MCQ */
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .option-btn {
+    width: 100%;
+    padding: 13px 16px;
+    background: #0f1117;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    color: #cbd5e1;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .option-btn:hover:not(:disabled) {
+    border-color: #4ade80;
+    background: #0f1a14;
+    color: #e2e8f0;
+  }
+
+  .option-letter {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    background: #1e2535;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: #64748b;
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+
+  .option-btn.correct {
+    border-color: #4ade80;
+    background: #0f2a1a;
+  }
+  .option-btn.correct .option-letter {
+    background: #4ade80;
+    color: #0f1117;
+  }
+
+  .option-btn.wrong {
+    border-color: #f87171;
+    background: #2a0f0f;
+  }
+  .option-btn.wrong .option-letter {
+    background: #f87171;
+    color: #0f1117;
+  }
+
+  /* Input answer */
+  .answer-input-wrap {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .answer-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 12px 16px;
+    background: #0f1117;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    color: #a5f3fc;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .answer-input:focus { border-color: #4ade80; }
+  .answer-input.correct-input { border-color: #4ade80; background: #0f2a1a; }
+  .answer-input.wrong-input { border-color: #f87171; background: #2a0f0f; }
+
+  .check-btn {
+    padding: 12px 24px;
+    background: #4ade80;
+    color: #0f1117;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .check-btn:hover { background: #22c55e; }
+
+  .feedback {
+    margin-top: 1rem;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    display: none;
+  }
+  .feedback.show { display: block; }
+  .feedback.ok { background: #0f2a1a; border: 1px solid #4ade8044; color: #4ade80; }
+  .feedback.err { background: #2a0f0f; border: 1px solid #f8717144; color: #fca5a5; }
+
+  .next-btn {
+    width: 100%;
+    padding: 13px;
+    background: #1e2535;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+    margin-top: 10px;
+    display: none;
+  }
+  .next-btn.show { display: block; }
+  .next-btn:hover { background: #2d3748; color: #e2e8f0; }
+
+  /* ─── RESULT ─── */
+  #result {
+    min-height: 100vh;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+  }
+  #result.active { display: flex; }
+
+  .result-ring {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    margin-bottom: 2rem;
+    position: relative;
+  }
+
+  .result-score {
+    font-size: 42px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    line-height: 1;
+  }
+
+  .result-total {
+    font-size: 14px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  .result-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .result-desc {
+    font-size: 15px;
+    color: #64748b;
+    max-width: 440px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  .level-badge {
+    padding: 8px 24px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2rem;
+  }
+
+  .breakdown {
+    background: #1a1f2e;
+    border: 1px solid #2d3748;
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 480px;
+    margin-bottom: 2rem;
+    text-align: left;
+  }
+
+  .breakdown h3 {
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+  }
+
+  .bd-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #2d3748;
+    font-size: 14px;
+  }
+  .bd-row:last-child { border-bottom: none; }
+
+  .bd-label { color: #94a3b8; }
+  .bd-score { font-family: 'JetBrains Mono', monospace; }
+  .bd-good { color: #4ade80; }
+  .bd-avg { color: #fbbf24; }
+  .bd-bad { color: #f87171; }
+
+  .restart-btn {
+    padding: 12px 32px;
+    background: #1e2535;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    color: #94a3b8;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all 0.2s;
+  }
+  .restart-btn:hover { background: #2d3748; color: #e2e8f0; }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div id="intro" class="screen active">
+  <div class="logo">A-Pro Academy · Placement Test</div>
+  <h1 class="intro-title">Тест на определение<br>уровня Python</h1>
+  <p class="intro-sub">20 вопросов — теория и практика. По результату мы определим в какую группу тебя зачислить.</p>
+
+  <div class="name-input-wrap">
+    <label>Твоё имя</label>
+    <input type="text" id="studentName" placeholder="Например: Алибек" oninput="checkName()">
+  </div>
+
+  <div class="meta-row">
+    <div class="meta-item"><div class="meta-dot dot-blue"></div>10 теоретических</div>
+    <div class="meta-item"><div class="meta-dot dot-yellow"></div>10 практических</div>
+    <div class="meta-item"><div class="meta-dot dot-red"></div>~15 минут</div>
+  </div>
+
+  <button class="start-btn" id="startBtn" onclick="startTest()" disabled>Начать тест →</button>
+</div>
+
+<!-- TEST -->
+<div id="test" class="screen">
+  <div class="test-header">
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar" style="width:0%"></div>
+    </div>
+    <div class="q-counter" id="qCounter">1 / 20</div>
+    <div class="score-live" id="scoreLive">★ 0</div>
+  </div>
+
+  <div id="sectionBadge" class="section-badge badge-theory">📖 Теория</div>
+
+  <div class="question-card" id="questionCard">
+    <div class="q-text" id="qText"></div>
+    <div id="qCodeBlock" class="code-block" style="display:none"></div>
+    <div id="qContent"></div>
+  </div>
+
+  <div class="feedback" id="feedback"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Следующий вопрос →</button>
+</div>
+
+<!-- RESULT -->
+<div id="result" class="screen">
+  <div class="result-ring" id="resultRing">
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-total" id="resultTotal"></div>
+  </div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-desc" id="resultDesc"></div>
+  <div class="level-badge" id="levelBadge"></div>
+  <div class="breakdown" id="breakdown"></div>
+  <button class="restart-btn" onclick="restart()">← Пройти заново</button>
+</div>
+
+<script>
+const questions = [
+  // ── ТЕОРИЯ ──
+  {
+    section: "theory",
+    text: "Кто создал язык программирования Python?",
+    type: "mcq",
+    options: ["Линус Торвальдс", "Гвидо ван Россум", "Деннис Ричи", "Джеймс Гослинг"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Какой результат выведет этот код?",
+    code: 'print(type(42))',
+    type: "mcq",
+    options: ["<class 'float'>", "<class 'str'>", "<class 'int'>", "<class 'num'>"],
+    correct: 2
+  },
+  {
+    section: "theory",
+    text: "Что выведет следующий код?",
+    code: 'print(10 // 3)',
+    type: "mcq",
+    options: ["3.33", "3", "1", "4"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Что выведет следующий код?",
+    code: 'print(10 % 3)',
+    type: "mcq",
+    options: ["3", "0", "1", "2"],
+    correct: 2 // 10 % 3 = 1
+  },
+  {
+    section: "theory",
+    text: "Какой оператор используется для возведения в степень в Python?",
+    type: "mcq",
+    options: ["^", "pow", "**", "//"],
+    correct: 2
+  },
+  {
+    section: "theory",
+    text: "Что выведет этот код?",
+    code: 'x = "Привет"\nprint(x[0])',
+    type: "mcq",
+    options: ["Привет", "П", "п", "0"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Что выведет следующий код?",
+    code: 'print("ab" * 3)',
+    type: "mcq",
+    options: ["ab3", "ababab", "aabbab", "Ошибка"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Что выведет этот код?",
+    code: 'print(5 > 3 and 2 < 1)',
+    type: "mcq",
+    options: ["True", "False", "Error", "None"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Какой результат вернёт функция len()?",
+    code: 'print(len("Python"))',
+    type: "mcq",
+    options: ["5", "6", "7", "Ошибка"],
+    correct: 1
+  },
+  {
+    section: "theory",
+    text: "Что выведет этот код?",
+    code: 'text = "hello world"\nprint(text.upper())',
+    type: "mcq",
+    options: ["hello world", "Hello World", "HELLO WORLD", "Ошибка"],
+    correct: 2
+  },
+
+  // ── ПРАКТИКА ──
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'x = 17\nprint(x % 5)',
+    type: "input",
+    correct: "2",
+    hint: "17 = 5×3 + 2, остаток равен 2"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'print(2 ** 8)',
+    type: "input",
+    correct: "256",
+    hint: "2 в степени 8 = 256"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'name = "Алибек"\nprint(len(name))',
+    type: "input",
+    correct: "6",
+    hint: "А-л-и-б-е-к = 6 символов"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'print("abc"[::-1])',
+    type: "input",
+    correct: "cba",
+    hint: "Срез [::-1] переворачивает строку"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'x = 256\nprint(x // 10 % 10)',
+    type: "input",
+    correct: "5",
+    hint: "256 // 10 = 25, затем 25 % 10 = 5 (средняя цифра)"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'text = "Python is fun"\nprint("is" in text)',
+    type: "input",
+    correct: "True",
+    hint: "Слово 'is' есть в строке → True"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'a = 10\nb = 3\nprint(a // b, a % b)',
+    type: "input",
+    correct: "3 1",
+    hint: "10//3=3, 10%3=1, выводятся через пробел"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'text = "  hello  "\nprint(text.strip())',
+    type: "input",
+    correct: "hello",
+    hint: "strip() убирает пробелы по краям"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'x = "banana"\nprint(x.count("a"))',
+    type: "input",
+    correct: "3",
+    hint: "b-A-n-A-n-A — три буквы 'a'"
+  },
+  {
+    section: "practice",
+    text: "Введите результат выполнения кода:",
+    code: 'score = 75\nif score >= 90:\n    print("A")\nelif score >= 75:\n    print("B")\nelse:\n    print("C")',
+    type: "input",
+    correct: "B",
+    hint: "75 >= 90 — False, 75 >= 75 — True → выводится B"
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+let theoryScore = 0;
+let practiceScore = 0;
+let studentName = "";
+
+function checkName() {
+  const val = document.getElementById('studentName').value.trim();
+  document.getElementById('startBtn').disabled = val.length < 2;
+}
+
+function startTest() {
+  studentName = document.getElementById('studentName').value.trim();
+  document.getElementById('intro').classList.remove('active');
+  document.getElementById('test').classList.add('active');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = questions[current];
+  answered = false;
+
+  // header
+  document.getElementById('progressBar').style.width = (current / questions.length * 100) + '%';
+  document.getElementById('qCounter').textContent = (current + 1) + ' / ' + questions.length;
+  document.getElementById('scoreLive').textContent = '★ ' + score;
+
+  // badge
+  const badge = document.getElementById('sectionBadge');
+  if (q.section === 'theory') {
+    badge.className = 'section-badge badge-theory';
+    badge.textContent = '📖 Теория';
+  } else {
+    badge.className = 'section-badge badge-practice';
+    badge.textContent = '💻 Практика';
+  }
+
+  document.getElementById('qText').textContent = q.text;
+
+  const codeBlock = document.getElementById('qCodeBlock');
+  if (q.code) {
+    codeBlock.textContent = q.code;
+    codeBlock.style.display = 'block';
+  } else {
+    codeBlock.style.display = 'none';
+  }
+
+  const content = document.getElementById('qContent');
+  const fb = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  nextBtn.className = 'next-btn';
+
+  if (q.type === 'mcq') {
+    const letters = ['A', 'B', 'C', 'D'];
+    content.innerHTML = '<div class="options-grid">' +
+      q.options.map((opt, i) =>
+        `<button class="option-btn" onclick="checkMCQ(${i})" id="opt${i}">
+          <span class="option-letter">${letters[i]}</span>
+          <span>${opt}</span>
+        </button>`
+      ).join('') + '</div>';
+  } else {
+    content.innerHTML = `
+      <div class="answer-input-wrap">
+        <input type="text" class="answer-input" id="answerInput" placeholder="Введи ответ..." onkeydown="if(event.key==='Enter') checkInput()">
+        <button class="check-btn" onclick="checkInput()">Проверить</button>
+      </div>`;
+    setTimeout(() => {
+      const inp = document.getElementById('answerInput');
+      if (inp) inp.focus();
+    }, 100);
+  }
+}
+
+function checkMCQ(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if (idx === q.correct) {
+    btns[idx].classList.add('correct');
+    score++;
+    if (q.section === 'theory') theoryScore++; else practiceScore++;
+    fb.className = 'feedback ok show';
+    fb.textContent = '✓ Правильно!';
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback err show';
+    fb.textContent = '✗ Неверно. Правильный ответ: ' + q.options[q.correct];
+  }
+  nextBtn.className = 'next-btn show';
+}
+
+function checkInput() {
+  if (answered) return;
+  const q = questions[current];
+  const inp = document.getElementById('answerInput');
+  const val = inp.value.trim();
+  if (!val) return;
+
+  answered = true;
+  inp.disabled = true;
+  document.querySelector('.check-btn').disabled = true;
+
+  const fb = document.getElementById('feedback');
+  const nextBtn = document.getElementById('nextBtn');
+
+  if (val === q.correct) {
+    inp.classList.add('correct-input');
+    score++;
+    if (q.section === 'theory') theoryScore++; else practiceScore++;
+    fb.className = 'feedback ok show';
+    fb.textContent = '✓ Правильно!';
+  } else {
+    inp.classList.add('wrong-input');
+    fb.className = 'feedback err show';
+    fb.innerHTML = `✗ Неверно. Правильный ответ: <strong>${q.correct}</strong><br><small style="color:#94a3b8;margin-top:4px;display:block">${q.hint}</small>`;
+  }
+  nextBtn.className = 'next-btn show';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showResult();
+  } else {
+    renderQuestion();
+  }
+}
+
+function showResult() {
+  document.getElementById('test').classList.remove('active');
+  document.getElementById('result').classList.add('active');
+
+  const pct = Math.round(score / questions.length * 100);
+
+  // ring color
+  const ring = document.getElementById('resultRing');
+  let ringColor = '#f87171';
+  if (pct >= 80) ringColor = '#4ade80';
+  else if (pct >= 60) ringColor = '#fbbf24';
+  ring.style.border = `6px solid ${ringColor}`;
+  ring.style.background = ringColor + '15';
+
+  document.getElementById('resultScore').textContent = score;
+  document.getElementById('resultScore').style.color = ringColor;
+  document.getElementById('resultTotal').textContent = 'из ' + questions.length;
+
+  let title, desc, level, levelColor, levelBg;
+  if (pct >= 85) {
+    title = 'Отличный результат! 🎉';
+    desc = `${studentName}, ты отлично знаешь Python. Рекомендуем продвинутую группу.`;
+    level = '🚀 Продвинутый уровень';
+    levelColor = '#4ade80'; levelBg = '#0f2a1a';
+  } else if (pct >= 65) {
+    title = 'Хороший результат! 👍';
+    desc = `${studentName}, у тебя хорошая база. Рекомендуем среднюю группу — уроки 4–7.`;
+    level = '📈 Средний уровень';
+    levelColor = '#fbbf24'; levelBg = '#2a1f00';
+  } else if (pct >= 40) {
+    title = 'Неплохое начало 💪';
+    desc = `${studentName}, есть пробелы. Рекомендуем группу с урока 2–3.`;
+    level = '📚 Начальный уровень';
+    levelColor = '#fb923c'; levelBg = '#2a1200';
+  } else {
+    title = 'Начнём с нуля! ✨';
+    desc = `${studentName}, Python — новый язык для тебя. Рекомендуем группу с самого начала — урок 1.`;
+    level = '🌱 Нулевой уровень';
+    levelColor = '#f87171'; levelBg = '#2a0f0f';
+  }
+
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultDesc').textContent = desc;
+  const lb = document.getElementById('levelBadge');
+  lb.textContent = level;
+  lb.style.background = levelBg;
+  lb.style.color = levelColor;
+  lb.style.border = `1px solid ${levelColor}44`;
+
+  const tPct = Math.round(theoryScore / 10 * 100);
+  const prPct = Math.round(practiceScore / 10 * 100);
+
+  function cls(p) { return p >= 70 ? 'bd-good' : p >= 50 ? 'bd-avg' : 'bd-bad'; }
+
+  document.getElementById('breakdown').innerHTML = `
+    <h3>Детальный результат</h3>
+    <div class="bd-row">
+      <span class="bd-label">📖 Теория</span>
+      <span class="bd-score ${cls(tPct)}">${theoryScore}/10 (${tPct}%)</span>
+    </div>
+    <div class="bd-row">
+      <span class="bd-label">💻 Практика</span>
+      <span class="bd-score ${cls(prPct)}">${practiceScore}/10 (${prPct}%)</span>
+    </div>
+    <div class="bd-row">
+      <span class="bd-label">Итого</span>
+      <span class="bd-score ${cls(pct)}">${score}/20 (${pct}%)</span>
+    </div>
+  `;
+}
+
+function restart() {
+  current = 0; score = 0; theoryScore = 0; practiceScore = 0; answered = false;
+  document.getElementById('result').classList.remove('active');
+  document.getElementById('intro').classList.add('active');
+  document.getElementById('studentName').value = '';
+  document.getElementById('startBtn').disabled = true;
+}
+</script>
+</body>
+</html>
